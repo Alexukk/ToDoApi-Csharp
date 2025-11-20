@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ToDoApi.Context;
 using ToDoApi.DTOs;
+using ToDoApi.Mapping;
 
 namespace ToDoApi.Controllers
 {
-    [Route("api/tasks/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class TaskApiController : ControllerBase
     {
@@ -19,27 +20,20 @@ namespace ToDoApi.Controllers
         [HttpGet] 
         public async Task<ActionResult<List<GetTaskDTO>>> GetAllTasks()
         {
-            var AllTasks = await _context.Tasks
-            .Select(task => new GetTaskDTO
-            {
-                Id = task.Id,
-                Title = task.Title,
-                Description = task.Description,
-                IsCompleted = task.IsCompleted,
-                CreatedAt = task.CreatedAt
-            })
-        .ToListAsync();
+            var tasksFromDb = await _context.Tasks.ToListAsync();
 
-            if (AllTasks.Count == 0)
+            var allTasksDto = tasksFromDb.Select(task => task.ToGetTaskDTO()).ToList();
+
+            if (allTasksDto.Count == 0)
             {
                 return NotFound("No tasks found.");
             }
 
-            return Ok(AllTasks);    
+            return Ok(allTasksDto);    
         }
 
 
-        [HttpGet("/{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<GetTaskDTO>> GetTaskById(int id)
         {
             var task = await _context.Tasks.FindAsync(id);
@@ -48,18 +42,30 @@ namespace ToDoApi.Controllers
             {
                 return NotFound($"No tasks found by id {id}");
             }
-            var taskRes = new GetTaskDTO
-            {
-                Id = task.Id,
-                Title = task.Title,
-                Description = task.Description,
-                IsCompleted = task.IsCompleted,
-                CreatedAt = task.CreatedAt
-            }; 
+            var taskRes = task.ToGetTaskDTO();
+
 
             return Ok(taskRes);
         }
 
 
+
+        [HttpPost]
+        public async Task<ActionResult> CreateTask([FromBody] CreateTaskDTO createTaskDTO)
+        {
+            if (createTaskDTO == null)
+            {
+                return BadRequest("Task data is not fully provided.");
+            }
+
+            var task = createTaskDTO.ToEntity();
+
+            _context.Tasks.Add(task);
+            await _context.SaveChangesAsync();
+
+            var resultDto = task.ToGetTaskDTO();
+
+            return CreatedAtAction(nameof(GetTaskById), new { id = resultDto.Id }, resultDto);
+        }
     }
 }

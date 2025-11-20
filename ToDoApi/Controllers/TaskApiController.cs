@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ToDoApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/tasks/[controller]")]
     [ApiController]
-    public class ToDoApiController : ControllerBase
+    public class TaskApiController : ControllerBase
     {
     }
 }

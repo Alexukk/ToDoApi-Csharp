@@ -29,6 +29,7 @@ namespace ToDoApi.Controllers
                 return NotFound("No tasks found.");
             }
 
+
             return Ok(allTasksDto);
         }
 
@@ -99,7 +100,19 @@ namespace ToDoApi.Controllers
             return NoContent();
         }
 
-       
+        [HttpPatch("/{id}")]
+        public async Task<ActionResult> ChangeStatus(int id, [FromBody] IsCompletedDTO newStatus)
+        {
+            var task = await _context.Tasks.FindAsync(id);
+            if (task == null)
+            {
+                return NotFound($"Task with id: {id} was not found.");
+            }
+
+            task.IsCompleted = newStatus.IsCompleted; ;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
 
 
 

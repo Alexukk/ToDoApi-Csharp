@@ -7,13 +7,14 @@ namespace ToDoApi.Mapping
     {
         public static GetTaskDTO ToGetTaskDTO(this TaskToDo task)
         {
+            const string CleanDateFormat = "yyyy-MM-dd HH:mm:ss";
             return new GetTaskDTO
             {
                 Id = task.Id,
                 Title = task.Title,
                 Description = task.Description,
                 IsCompleted = task.IsCompleted,
-                CreatedAt = task.CreatedAt
+                CreatedAt = task.CreatedAt.ToString(CleanDateFormat)
             };
         }
 

@@ -17,7 +17,7 @@ namespace ToDoApi.Controllers
             _context = context;
         }
 
-        [HttpGet] 
+        [HttpGet]
         public async Task<ActionResult<List<GetTaskDTO>>> GetAllTasks()
         {
             var tasksFromDb = await _context.Tasks.ToListAsync();
@@ -29,7 +29,7 @@ namespace ToDoApi.Controllers
                 return NotFound("No tasks found.");
             }
 
-            return Ok(allTasksDto);    
+            return Ok(allTasksDto);
         }
 
 
@@ -67,5 +67,41 @@ namespace ToDoApi.Controllers
 
             return CreatedAtAction(nameof(GetTaskById), new { id = resultDto.Id }, resultDto);
         }
+
+        [HttpPut("/{id}")]
+        public async Task<ActionResult> UpdateTask(int id, [FromBody] UpdateTaskDTO updatedInfo)
+        {
+            var existingTask = await _context.Tasks.FindAsync(id);
+            if (existingTask == null)
+            {
+                return NotFound($"Task with id: {id} was not found.");
+            }
+
+            existingTask.ApplyUpdate(updatedInfo);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
+        [HttpDelete("/{id}")]
+        public async Task<ActionResult> DeleteTask(int id)
+        {
+            var taskToDelete = await _context.Tasks.FindAsync(id);
+            if (taskToDelete == null)
+            {
+                return NoContent();
+            }
+
+            _context.Tasks.Remove(taskToDelete);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+       
+
+
+
     }
 }

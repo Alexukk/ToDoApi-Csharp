@@ -28,6 +28,15 @@ namespace ToDoApi.Mapping
             };
         }
 
+        public static void ApplyUpdate(this TaskToDo ExisitngEntity, UpdateTaskDTO task)
+        {
+            
+            ExisitngEntity.Title = task.Title;
+            ExisitngEntity.Description = task.Description;
+
+        }
+
+
 
     }
 }
